@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Interactiva de Estudio - Mecánica de Fluidos</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MathJax for rendering equations -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="mathjax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+    <header class="bg-indigo-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-700 p-2 rounded-lg">
+                    <i class="fa-solid fa-water text-2xl text-cyan-400"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">Guía Interactiva de Estudio</h1>
+                    <p class="text-xs text-indigo-200">Mecánica de Fluidos e Ingeniería</p>
+                </div>
+            </div>
+
+            <!-- Global Navigation Tabs -->
+            <nav class="flex items-center gap-1 sm:gap-2 bg-indigo-950 p-1 rounded-xl text-xs sm:text-sm">
+                <button onclick="switchTab('study')" id="nav-study" class="px-3 py-1.5 rounded-lg transition-all font-medium bg-indigo-600 text-white shadow">
+                    <i class="fa-solid fa-book-open mr-1"></i> Estudio / Práctica
+                </button>
+                <button onclick="switchTab('exam')" id="nav-exam" class="px-3 py-1.5 rounded-lg transition-all font-medium text-indigo-300 hover:text-white hover:bg-indigo-800/50">
+                    <i class="fa-solid fa-stopwatch mr-1"></i> Simulacro
+                </button>
+                <button onclick="switchTab('review')" id="nav-review" class="px-3 py-1.5 rounded-lg transition-all font-medium text-indigo-300 hover:text-white hover:bg-indigo-800/50">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Repaso de Errores <span id="error-badge" class="bg-rose-500 text-white px-1.5 py-0.5 rounded-full text-xs ml-1 hidden">0</span>
+                </button>
+                <button onclick="switchTab('stats')" id="nav-stats" class="px-3 py-1.5 rounded-lg transition-all font-medium text-indigo-300 hover:text-white hover:bg-indigo-800/50">
+                    <i class="fa-solid fa-chart-pie mr-1"></i> Progreso
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <section id="tab-study" class="space-y-6">
+            <!-- Unit Filter Bar -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-filter text-indigo-600"></i>
+                    <span class="font-semibold text-sm text-slate-700">Tema:</span>
+                    <select id="unit-select" onchange="filterQuestions()" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="all">Todas las Unidades (37 Ejercicios)</option>
+                        <option value="1">Unidad 1: Propiedades de los Fluidos</option>
+                        <option value="2">Unidad 2: Presión y Estática de Fluidos</option>
+                        <option value="3">Unidad 3: Análisis Dimensional</option>
+                        <option value="4">Unidad 4: Ecuaciones de Bernoulli y Energía</option>
+                        <option value="5">Unidad 5: Cantidad de Movimiento</option>
+                        <option value="6">Unidad 6: Flujo Viscoso en Tuberías</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-4 text-xs font-medium text-slate-500">
+                    <span id="question-counter">Mostrando 1 de 37</span>
+                    <div class="w-32 bg-slate-200 h-2 rounded-full overflow-hidden">
+                        <div id="unit-progress-bar" class="bg-indigo-600 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Interactive Card Container -->
+            <div id="question-card" class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden transition-all">
+                <!-- Dynamic Content Injected Here -->
+            </div>
+
+            <!-- Navigation Controls -->
+            <div class="flex justify-between items-center">
+                <button onclick="navigateQuestion(-1)" id="btn-prev" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-xl font-medium shadow-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Anterior
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="resetCurrentQuestion()" class="px-3 py-2 bg-slate-100 text-slate-600 rounded-xl font-medium hover:bg-slate-200 text-sm">
+                        <i class="fa-solid fa-arrows-rotate mr-1"></i> Reiniciar Pregunta
+                    </button>
+                </div>
+                <button onclick="navigateQuestion(1)" id="btn-next" class="px-4 py-2 bg-indigo-600 text-white rounded-xl font-medium shadow hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Siguiente <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </section>
+
+        <section id="tab-exam" class="hidden space-y-6">
+            <div id="exam-welcome" class="bg-white rounded-2xl p-8 border border-slate-200 text-center max-w-2xl mx-auto shadow-sm">
+                <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Simulacro de Examen de Mecánica de Fluidos</h2>
+                <p class="text-slate-600 text-sm mb-6">
+                    Se seleccionará una muestra aleatoria balanceada de 10 ejercicios de todas las unidades. Evaluará tus habilidades teóricas y capacidad de resolución numérica bajo tiempo limitado.
+                </p>
+
+                <div class="bg-slate-50 rounded-xl p-4 text-left mb-6 space-y-3 text-sm text-slate-700 border border-slate-200">
+                    <div class="flex items-center"><i class="fa-regular fa-clock text-indigo-600 w-6"></i> <span>Tiempo Límite: <strong>45 Minutos</strong> (opcional)</span></div>
+                    <div class="flex items-center"><i class="fa-solid fa-list-check text-indigo-600 w-6"></i> <span>Total de Preguntas: <strong>10 aleatorias</strong></span></div>
+                    <div class="flex items-center"><i class="fa-solid fa-shield-halved text-indigo-600 w-6"></i> <span>Retroalimentación completa al finalizar la prueba</span></div>
+                </div>
+
+                <button onclick="startExam()" class="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl shadow-md hover:bg-indigo-700 transition-all text-base">
+                    Comenzar Simulacro
+                </button>
+            </div>
+
+            <!-- Exam Active View -->
+            <div id="exam-active" class="hidden space-y-6">
+                <div class="bg-indigo-900 text-white p-4 rounded-xl flex justify-between items-center shadow-sm">
+                    <div class="flex items-center space-x-3">
+                        <span id="exam-timer" class="font-mono text-xl bg-indigo-950 px-3 py-1 rounded-lg border border-indigo-700 text-amber-400">
+                            45:00
+                        </span>
+                        <span class="text-xs text-indigo-200 hidden sm:inline">Tiempo Restante</span>
+                    </div>
+                    <span id="exam-progress-text" class="text-sm font-medium">Pregunta 1 de 10</span>
+                    <button onclick="finishExam()" class="px-3 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded-lg hover:bg-rose-700">
+                        Entregar Examen
+                    </button>
+                </div>
+
+                <div id="exam-question-card" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <!-- Dynamic Exam Question -->
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <button onclick="navigateExamQuestion(-1)" id="btn-exam-prev" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-xl font-medium hover:bg-slate-50">
+                        Anterior
+                    </button>
+                    <button onclick="navigateExamQuestion(1)" id="btn-exam-next" class="px-4 py-2 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700">
+                        Siguiente
+                    </button>
+                </div>
+            </div>
+
+            <!-- Exam Results Screen -->
+            <div id="exam-results" class="hidden bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+                <!-- Generated dynamically -->
+            </div>
+        </section>
+
+        <section id="tab-review" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Repaso de Errores y Oportunidades de Mejora</h2>
+                        <p class="text-xs text-slate-500">A continuación se muestran los ejercicios en los que has fallado previamente.</p>
+                    </div>
+                    <button onclick="clearErrorList()" class="text-xs text-rose-600 hover:underline">
+                        Limpiar Historial de Errores
+                    </button>
+                </div>
+                <div id="error-list-container" class="space-y-4">
+                    <!-- Injected Error Cards -->
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-stats" class="hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="p-3 bg-indigo-100 text-indigo-600 rounded-xl">
+                        <i class="fa-solid fa-list-check text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Respondidas</p>
+                        <h3 id="stat-total-answered" class="text-2xl font-bold text-slate-800">0 / 37</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="p-3 bg-emerald-100 text-emerald-600 rounded-xl">
+                        <i class="fa-solid fa-circle-check text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Dominadas</p>
+                        <h3 id="stat-mastered" class="text-2xl font-bold text-slate-800">0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="p-3 bg-amber-100 text-amber-600 rounded-xl">
+                        <i class="fa-solid fa-bullseye text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">% Precisión</p>
+                        <h3 id="stat-accuracy" class="text-2xl font-bold text-slate-800">0%</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="p-3 bg-rose-100 text-rose-600 rounded-xl">
+                        <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Pendientes Repaso</p>
+                        <h3 id="stat-errors-count" class="text-2xl font-bold text-slate-800">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress By Unit Breakdown -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <h3 class="font-bold text-slate-800 text-lg">Progreso por Unidad Académica</h3>
+                <div id="unit-stats-breakdown" class="space-y-4">
+                    <!-- Progress bars injected via JS -->
+                </div>
+            </div>
+
+            <!-- LocalStorage Info Banner -->
+            <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-xl text-xs text-indigo-800 flex items-start space-x-3">
+                <i class="fa-solid fa-circle-info text-indigo-600 text-base mt-0.5"></i>
+                <div>
+                    <strong>Almacenamiento Local Activo:</strong> Tu progreso de estudio se guarda automáticamente en el navegador de tu dispositivo actual. No requiere inicio de sesión. Ten en cuenta que si borras los datos de navegación o cambias de navegador, tu avance local se reiniciará.
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 text-xs py-4 border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div>
+                Guía Interactiva de Estudio &copy; Mecánica de Fluidos para Ingeniería
+            </div>
+            <div class="flex items-center space-x-4">
+                <button onclick="resetAllData()" class="hover:text-rose-400 text-slate-500 transition-colors">
+                    <i class="fa-solid fa-trash-can mr-1"></i> Borrar Todo mi Progreso
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        /* Database of 37 Exact Exercises based on provided Word Document */
+        const questionsData = [
+            // UNIT 1
+            {
+                id: 1,
+                unit: 1,
+                unitTitle: "Unidad 1: Propiedades de los Fluidos",
+                type: "conceptual",
+                question: "Define el concepto de Capa Límite (Boundary Layer) en mecánica de fluidos.",
+                keywords: ["viscosidad", "velocidad", "gradiente", "superficie", "fricción", "pared", "efecto"],
+                sampleAnswer: "Es la región adyacente a una superficie sólida donde los efectos viscosos de cortante son significativos debido a la condición de no deslizamiento, generando un gradiente de velocidad desde cero en la pared hasta la velocidad del flujo libre.",
+                hints: ["Piensa en qué sucede con la velocidad del fluido justo al tocar una pared sólida y cómo se va recuperando gradualmente a medida que te alejas de ella."]
+            },
+            {
+                id: 2,
+                unit: 1,
+                unitTitle: "Unidad 1: Propiedades de los Fluidos",
+                type: "conceptual",
+                question: "Define el principio o condición de No Deslizamiento (No-Slip Condition).",
+                keywords: ["adhiere", "velocidad", "cero", "superficie", "sólida", "contacto", "reposo"],
+                sampleAnswer: "Es la condición física por la cual un fluido en contacto directo con una superficie sólida se adhiere a ella por efectos viscosos, adquiriendo exactamente la misma velocidad que la superficie (velocidad cero si la superficie está en reposo).",
+                hints: ["Se refiere a la velocidad relativa entre la primera capa del fluido y la superficie sólida que toca."]
+            },
+            {
+                id: 3,
+                unit: 1,
+                unitTitle: "Unidad 1: Propiedades de los Fluidos",
+                type: "conceptual",
+                question: "Define Presión desde el punto de vista de la mecánica de fluidos.",
+                keywords: ["fuerza", "normal", "área", "unitaria", "perpendicular", "superficie"],
+                sampleAnswer: "Es la fuerza normal ejercida por un fluido por unidad de área de superficie. Matemáticamente $P = F/A$ y se mide en pascales (Pa) en el Sistema Internacional.",
+                hints: ["Relaciona la fuerza perpendicular actuante sobre un área dada."]
+            },
+            {
+                id: 4,
+                unit: 1,
+                unitTitle: "Unidad 1: Propiedades de los Fluidos",
+                type: "conceptual",
+                question: "¿Cuándo un sistema termodinámico/fluido es un sistema cerrado y cuándo es un volumen de control (sistema abierto)?",
+                keywords: ["masa", "frontera", "cruza", "cerrado", "volumen de control", "flujo", "transferencia"],
+                sampleAnswer: "Un sistema es cerrado cuando consta de una cantidad fija de masa y la masa no puede cruzar sus fronteras (solo energía). Es un volumen de control cuando la masa cruza la frontera del sistema a través de un volumen definido.",
+                hints: ["Observa si la cantidad de masa dentro del límite permanece fija o si entra y sale masa continuamente."]
+            },
+            {
+                id: 5,
+                unit: 1,
+                unitTitle: "Unidad 1: Propiedades de los Fluidos",
+                type: "mcq",
+                question: "Si la masa, el calor y el trabajo no pueden cruzar las fronteras de un sistema, el sistema se denomina:",
+                options: ["A) Sistema abierto", "B) Sistema aislado", "C) Volumen de control", "D) Sistema isotérmico"],
+                correctAnswer: 1, // B
+                explanation: "Un sistema aislado es aquel en el que ni la masa ni la energía (calor o trabajo) pueden cruzar la frontera.",
+                hints: ["Es un tipo especial de sistema cerrado sin interacción energética alguna con el entorno."]
+            },
+            {
+                id: 6,
+                unit: 1,
+                unitTitle: "Unidad 1: Propiedades de los Fluidos",
+                type: "numeric",
+                question: "Una planta hidroeléctrica opera a su potencia nominal de 12 MW. Si produce 26 millones de kWh (26,000,000 kWh) de electricidad en un año especificado, determine el número de horas que la planta operó en dicho año.",
+                givenData: "Potencia $P = 12\\text{ MW} = 12,000\\text{ kW}$, Energía $E = 26,000,000\\text{ kWh}$.",
+                targetUnit: "horas",
+                acceptedUnits: ["h", "horas", "hr", "hrs"],
+                correctValue: 2166.67,
+                tolerancePercent: 1.0,
+                formula: "t = \\frac{E}{P} = \\frac{26,000,000\\text{ kWh}}{12,000\\text{ kW}} = 2166.67\\text{ horas}",
+                hints: [
+                    "Paso 1: Convierte la potencia de MW a kW ($12\\text{ MW} = 12,000\\text{ kW}$).",
+                    "Paso 2: Usa la relación Energía = Potencia × Tiempo ($E = P \\cdot t$), despejando el tiempo $t = E / P$."
+                ]
+            },
+            {
+                id: 7,
+                unit: 1,
+                unitTitle: "Unidad 1: Propiedades de los Fluidos",
+                type: "conceptual",
+                question: "¿Qué es la Gravedad Específica (SG) y cómo se relaciona con la densidad del agua?",
+                keywords: ["relación", "densidad", "agua", "referencia", "adimensional", "4°C"],
+                sampleAnswer: "Es una magnitud adimensional definida como la razón entre la densidad del fluido y la densidad de una sustancia de referencia (habitualmente agua pura a $4^\\circ\\text{C}$ con $\\rho_{H_2O} = 1000\\text{ kg/m}^3$). $SG = \\rho / \\rho_{agua}$.",
+                hints: ["Piensa en la comparación adimensional con la densidad estándar del agua pura."]
+            },
+            {
+                id: 8,
+                unit: 1,
+                unitTitle: "Unidad 1: Propiedades de los Fluidos",
+                type: "numeric",
+                question: "Un fluido que ocupa un volumen $V = 24\\text{ L}$ pesa $W = 225\\text{ N}$ en una ubicación donde $g = 9.80\\text{ m/s}^2$. Determine la densidad del fluido $\\rho$ en $\\text{kg/m}^3$.",
+                givenData: "$V = 24\\text{ L} = 0.024\\text{ m}^3$, $W = 225\\text{ N}$, $g = 9.80\\text{ m/s}^2$.",
+                targetUnit: "kg/m^3",
+                acceptedUnits: ["kg/m3", "kg/m^3", "kg / m^3"],
+                correctValue: 956.63,
+                tolerancePercent: 2.0,
+                formula: "m = \\frac{W}{g} = \\frac{225}{9.80} = 22.959\\text{ kg} \\implies \\rho = \\frac{m}{V} = \\frac{22.959\\text{ kg}}{0.024\\text{ m}^3} = 956.63\\text{ kg/m}^3",
+                hints: [
+                    "Paso 1: Calcula la masa $m = W / g = 225 / 9.80 = 22.96\\text{ kg}$.",
+                    "Paso 2: Convierte litros a metros cúbicos ($24\\text{ L} = 0.024\\text{ m}^3$).",
+                    "Paso 3: Divide la masa entre el volumen $\\rho = m / V$."
+                ]
+            },
+
+            // UNIT 2
+            {
+                id: 9,
+                unit: 2,
+                unitTitle: "Unidad 2: Presión y Estática de Fluidos",
+                type: "conceptual",
+                question: "¿Qué es la viscosidad de un fluido?",
+                keywords: ["resistencia", "deformación", "cortante", "fricción", "interna", "movimiento"],
+                sampleAnswer: "Es la propiedad física de un fluido que mide su resistencia interna a la deformación tangencial o al movimiento relativo entre sus capas contiguas debido a la fricción molecular.",
+                hints: ["Es el equivalente a la 'fricción interna' de las capas de un fluido al desplazarse."]
+            },
+            {
+                id: 10,
+                unit: 2,
+                unitTitle: "Unidad 2: Presión y Estática de Fluidos",
+                type: "numeric",
+                question: "Considere una mujer de $55\\text{ kg}$ con un área total de huella de $400\\text{ cm}^2$. Desea caminar sobre la nieve, pero esta no puede soportar presiones superiores a $0.5\\text{ kPa}$. Determine el tamaño mínimo de cada raqueta de nieve en $\\text{cm}^2$ (área de huella por raqueta/pie).",
+                givenData: "$m = 55\\text{ kg}$, $P_{máx} = 0.5\\text{ kPa} = 500\\text{ Pa}$, $g = 9.81\\text{ m/s}^2$.",
+                targetUnit: "cm^2",
+                acceptedUnits: ["cm2", "cm^2", "cm^2/pie"],
+                correctValue: 5395.5,
+                tolerancePercent: 3.0,
+                formula: "F = m \\cdot g = 55 \\times 9.81 = 539.55\\text{ N} \\implies A_{total} = \\frac{F}{P_{máx}} = \\frac{539.55}{500} = 1.0791\\text{ m}^2 = 10791\\text{ cm}^2 \\implies A_{raqueta} = \\frac{10791}{2} = 5395.5\\text{ cm}^2",
+                hints: [
+                    "Paso 1: Encuentra la fuerza de peso total $F = m \\cdot g = 55 \\times 9.81\\text{ N}$.",
+                    "Paso 2: Usa $A_{total} = F / P_{máx}$ para hallar el área total requerida para ambos pies en $\\text{m}^2$.",
+                    "Paso 3: Convierte $1\\text{ m}^2 = 10,000\\text{ cm}^2$ y divide entre 2 para obtener el área de cada raqueta."
+                ]
+            },
+            {
+                id: 11,
+                unit: 2,
+                unitTitle: "Unidad 2: Presión y Estática de Fluidos",
+                type: "numeric",
+                question: "Un vacuómetro conectado a un tanque marca $45\\text{ kPa}$ en un lugar donde la lectura barométrica es $755\\text{ mmHg}$. Con $\\rho_{Hg} = 13,590\\text{ kg/m}^3$ y $g = 9.807\\text{ m/s}^2$, determine la presión absoluta en el tanque en $\\text{kPa}$.",
+                givenData: "$P_{vac} = 45\\text{ kPa}$, $h = 0.755\\text{ m}$, $\\rho_{Hg} = 13590\\text{ kg/m}^3$.",
+                targetUnit: "kPa",
+                acceptedUnits: ["kPa"],
+                correctValue: 55.62,
+                tolerancePercent: 2.0,
+                formula: "P_{atm} = \\rho g h = 13590 \\times 9.807 \\times 0.755 / 1000 = 100.62\\text{ kPa} \\implies P_{abs} = P_{atm} - P_{vac} = 100.62 - 45 = 55.62\\text{ kPa}",
+                hints: [
+                    "Paso 1: Calcula la presión atmosférica local $P_{atm} = \\rho g h$ en Pa y divide entre 1000 para $\\text{kPa}$.",
+                    "Paso 2: Recuerda que para presiones de vacío $P_{abs} = P_{atm} - P_{vac}$."
+                ]
+            },
+            {
+                id: 12,
+                unit: 2,
+                unitTitle: "Unidad 2: Presión y Estática de Fluidos",
+                type: "numeric",
+                question: "Un manómetro con aceite ($\\rho = 850\\text{ kg/m}^3$) se conecta a un tanque de aire. Si la diferencia de nivel de aceite entre las dos columnas es $150\\text{ cm}$ y la presión atmosférica es $98\\text{ kPa}$, determine la presión absoluta del aire en el tanque en $\\text{kPa}$.",
+                givenData: "$\\rho = 850\\text{ kg/m}^3$, $\\Delta h = 1.5\\text{ m}$, $P_{atm} = 98\\text{ kPa}$, $g = 9.81\\text{ m/s}^2$.",
+                targetUnit: "kPa",
+                acceptedUnits: ["kPa"],
+                correctValue: 110.51,
+                tolerancePercent: 2.0,
+                formula: "P_{man} = \\rho g \\Delta h = 850 \\times 9.81 \\times 1.5 = 12507.75\\text{ Pa} = 12.51\\text{ kPa} \\implies P_{abs} = 98 + 12.51 = 110.51\\text{ kPa}",
+                hints: [
+                    "Paso 1: Calcula la presión manométrica de la columna de aceite: $P_{man} = \\rho \\cdot g \\cdot h$.",
+                    "Paso 2: Suma la presión manométrica a la atmosférica: $P_{abs} = P_{atm} + P_{man}$."
+                ]
+            },
+            {
+                id: 13,
+                unit: 2,
+                unitTitle: "Unidad 2: Presión y Estática de Fluidos",
+                type: "numeric",
+                question: "Un manómetro de doble fluido está conectado a una tubería de aire con $P_{abs} = 76\\text{ kPa}$. La presión atmosférica es $100\\text{ kPa}$. El fluido 1 tiene $SG_1 = 13.55$ con una altura de $22\\text{ cm}$. La altura del segundo fluido es $33\\text{ cm}$. Determine la gravedad específica $SG_2$ del segundo fluido.",
+                givenData: "$P_{aire} = 76\\text{ kPa}$, $P_{atm} = 100\\text{ kPa}$, $SG_1 = 13.55$, $h_1 = 0.22\\text{ m}$, $h_2 = 0.33\\text{ m}$.",
+                targetUnit: "adimensional",
+                acceptedUnits: ["", "adimensional", "sin unidades"],
+                correctValue: 1.62,
+                tolerancePercent: 3.0,
+                formula: "P_{aire} + SG_1 \\gamma_w h_1 - SG_2 \\gamma_w h_2 = P_{atm} \\implies 76 + (13.55 \\times 9.81 \\times 0.22) - SG_2(9.81 \\times 0.33) = 100 \\implies 105.24 - 3.237 SG_2 = 100 \\implies SG_2 = 1.62",
+                hints: [
+                    "Paso 1: Escribe la ecuación hidrostática recorriendo el manómetro: $P_{aire} + \\rho_1 g h_1 - \\rho_2 g h_2 = P_{atm}$.",
+                    "Paso 2: Expresa las densidades en función de $\\rho_w = 9.81\\text{ kN/m}^3$ y despeja $SG_2$."
+                ]
+            },
+            {
+                id: 14,
+                unit: 2,
+                unitTitle: "Unidad 2: Presión y Estática de Fluidos",
+                type: "numeric",
+                question: "Determine la presión atmosférica en $\\text{kPa}$ en una ubicación donde la lectura barométrica es $735\\text{ mmHg}$. Considere $\\rho_{Hg} = 13,600\\text{ kg/m}^3$ y $g = 9.807\\text{ m/s}^2$.",
+                givenData: "$h = 0.735\\text{ m}$, $\\rho = 13600\\text{ kg/m}^3$, $g = 9.807\\text{ m/s}^2$.",
+                targetUnit: "kPa",
+                acceptedUnits: ["kPa"],
+                correctValue: 98.03,
+                tolerancePercent: 1.5,
+                formula: "P_{atm} = \\rho g h = 13600 \\times 9.807 \\times 0.735 = 98031\\text{ Pa} = 98.03\\text{ kPa}",
+                hints: [
+                    "Usa la fórmula barométrica directa: $P = \\rho_{Hg} \\cdot g \\cdot h$. Convierte $735\\text{ mmHg}$ a $0.735\\text{ m}$."
+                ]
+            },
+            {
+                id: 15,
+                unit: 2,
+                unitTitle: "Unidad 2: Presión y Estática de Fluidos",
+                type: "numeric",
+                question: "Un manómetro de mercurio ($\\rho = 13,600\\text{ kg/m}^3$) se conecta a un tanque de aire. Si la diferencia de nivel es $\\Delta h = 150\\text{ cm}$ ($1.5\\text{ m}$) y la presión atmosférica es $98\\text{ kPa}$, determine la presión absoluta del aire en el tanque en $\\text{kPa}$.",
+                givenData: "$\\rho = 13600\\text{ kg/m}^3$, $\\Delta h = 1.5\\text{ m}$, $P_{atm} = 98\\text{ kPa}$, $g = 9.81\\text{ m/s}^2$.",
+                targetUnit: "kPa",
+                acceptedUnits: ["kPa"],
+                correctValue: 298.12,
+                tolerancePercent: 2.0,
+                formula: "P_{man} = 13600 \\times 9.81 \\times 1.5 = 200,124\\text{ Pa} = 200.12\\text{ kPa} \\implies P_{abs} = 98 + 200.12 = 298.12\\text{ kPa}",
+                hints: [
+                    "Calcula la elevación manométrica ejercida por el mercurio: $P_{man} = \\rho g h = 13600 \\times 9.81 \\times 1.5\\text{ Pa}$ y súmala a la atmosférica."
+                ]
+            },
+            {
+                id: 16,
+                unit: 2,
+                unitTitle: "Unidad 2: Presión y Estática de Fluidos",
+                type: "numeric",
+                question: "Exprese la presión atmosférica estándar ($101.325\\text{ kPa}$) en término de carga de presión de columna de Agua ($SG=1.0$) en metros de columna ($m$). Explique conceptualmente por qué se prefiere usar mercurio en manómetros.",
+                givenData: "$P = 101.325\\text{ kPa} = 101,325\\text{ Pa}$, $\\rho_w = 1000\\text{ kg/m}^3$, $g = 9.81\\text{ m/s}^2$.",
+                targetUnit: "m",
+                acceptedUnits: ["m", "m H2O", "metros"],
+                correctValue: 10.33,
+                tolerancePercent: 2.0,
+                formula: "h_{agua} = \\frac{P}{\\rho_w g} = \\frac{101325}{1000 \\times 9.81} = 10.33\\text{ m}",
+                hints: [
+                    "Paso 1: Despeja la carga de presión $h = P / (\\rho \\cdot g)$.",
+                    "Paso 2: Observa que $10.33\\text{ m}$ de agua requerirían tubos gigantescos, por lo que el mercurio (solo $0.76\\text{ m}$) es mucho más práctico."
+                ]
+            },
+            {
+                id: 17,
+                unit: 2,
+                unitTitle: "Unidad 2: Presión y Estática de Fluidos",
+                type: "numeric",
+                question: "Un manómetro de mercurio ($\\rho = 13,600\\text{ kg/m}^3$) se conecta a un ducto de gas. La diferencia de nivel es $h = 10\\text{ mm}$ ($0.01\\text{ m}$) con el lado abierto más elevado. Si la presión atmosférica es $100\\text{ kPa}$, determine la presión absoluta dentro del ducto en $\\text{kPa}$.",
+                givenData: "$\\rho = 13600\\text{ kg/m}^3$, $h = 0.01\\text{ m}$, $P_{atm} = 100\\text{ kPa}$, $g = 9.81\\text{ m/s}^2$.",
+                targetUnit: "kPa",
+                acceptedUnits: ["kPa"],
+                correctValue: 100.133,
+                tolerancePercent: 1.0,
+                formula: "P_{abs} = P_{atm} + \\rho g h = 100 + \\frac{13600 \\times 9.81 \\times 0.01}{1000} = 100 + 0.1334 = 100.133\\text{ kPa}",
+                hints: [
+                    "Paso 1: Puesto que la columna abierta al exterior está más elevada, la presión del gas es mayor que la atmosférica.",
+                    "Paso 2: Convierte $10\\text{ mm} = 0.01\\text{ m}$ y calcula $P_{abs} = P_{atm} + \\rho g h$."
+                ]
+            },
+
+            // UNIT 3
+            {
+                id: 18,
+                unit: 3,
+                unitTitle: "Unidad 3: Análisis Dimensional",
+                type: "conceptual",
+                question: "Escriba las dimensiones primarias $[M, L, T, N, \\Theta]$ de la constante universal de los gases ideales $R_u$ a partir de la ecuación $P V = n R_u T$.",
+                keywords: ["M", "L", "T", "N", "Theta", "L^2", "T^-2", "N^-1", "Theta^-1"],
+                sampleAnswer: "Las dimensiones primarias son $[M L^2 T^{-2} N^{-1} \\Theta^{-1}]$. Trabajo analítico: $[R_u] = [P][V]/([n][T]) = (M L^{-1} T^{-2})(L^3) / (N \\Theta) = M L^2 T^{-2} N^{-1} \\Theta^{-1}$. En unidades SI equivale a $\\text{kg}\\cdot\\text{m}^2/(\\text{s}^2\\cdot\\text{mol}\\cdot\\text{K})$.",
+                hints: ["Sustituye la presión $[P] = M L^{-1} T^{-2}$, volumen $[V] = L^3$, cantidad de sustancia $[n] = N$ y temperatura $[T] = \\Theta$."]
+            },
+            {
+                id: 19,
+                unit: 3,
+                unitTitle: "Unidad 3: Análisis Dimensional",
+                type: "conceptual",
+                question: "Escriba las dimensiones primarias del Voltaje o Potencial Eléctrico $E$, sabiendo que la Potencia eléctrica es igual al voltaje por la corriente ($W = E \\cdot I$).",
+                keywords: ["M", "L^2", "T^-3", "I^-1", "potencia", "corriente"],
+                sampleAnswer: "Las dimensiones primarias son $[M L^2 T^{-3} I^{-1}]$. Procedimiento: Potencia = Energía/Tiempo $\\to [W] = M L^2 T^{-3}$. Despejando $[E] = [W]/[I] = M L^2 T^{-3} I^{-1}$.",
+                hints: ["Primero expresa la dimensión de la potencia $[W] = M L^2 T^{-3}$ y luego divídela entre la dimensión de corriente $[I]$."]
+            },
+            {
+                id: 20,
+                unit: 3,
+                unitTitle: "Unidad 3: Análisis Dimensional",
+                type: "conceptual",
+                question: "Escriba las dimensiones primarias del Momento de Fuerza o Torque ($M = F \\cdot d$).",
+                keywords: ["M", "L^2", "T^-2", "fuerza", "distancia"],
+                sampleAnswer: "Las dimensiones primarias son $[M L^2 T^{-2}]$. Procedimiento: Fuerza $[F] = M L T^{-2}$, Distancia $[d] = L$. $[M] = (M L T^{-2})(L) = M L^2 T^{-2}$.",
+                hints: ["Multiplica la dimensión de la fuerza por la dimensión de la distancia transversal."]
+            },
+            {
+                id: 21,
+                unit: 3,
+                unitTitle: "Unidad 3: Análisis Dimensional",
+                type: "conceptual",
+                question: "Determine las dimensiones primarias de la Resistencia Eléctrica $R$ utilizando la ley de Ohm ($\\Delta E = I \\cdot R$).",
+                keywords: ["M", "L^2", "T^-3", "I^-2", "voltaje", "corriente"],
+                sampleAnswer: "Las dimensiones son $[M L^2 T^{-3} I^{-2}]$. Procedimiento: $[R] = [E] / [I] = (M L^2 T^{-3} I^{-1}) / I = M L^2 T^{-3} I^{-2}$.",
+                hints: ["Divide las dimensiones del potencial eléctrico $E$ entre la corriente $I$."]
+            },
+            {
+                id: 22,
+                unit: 3,
+                unitTitle: "Unidad 3: Análisis Dimensional",
+                type: "conceptual",
+                question: "Escriba las dimensiones primarias de: a) Aceleración lineal $a$, b) Velocidad angular $\\omega$, c) Aceleración angular $\\alpha$.",
+                keywords: ["L T^-2", "T^-1", "T^-2", "aceleración", "angular"],
+                sampleAnswer: "a) Aceleración $a$: $[L T^{-2}]$; b) Velocidad angular $\\omega$: $[T^{-1}]$ (radianes son adimensionales); c) Aceleración angular $\\alpha$: $[T^{-2}]$.",
+                hints: ["Los ángulos/radianes son adimensionales. La aceleración es cambio de velocidad por unidad de tiempo."]
+            },
+
+            // UNIT 4
+            {
+                id: 23,
+                unit: 4,
+                unitTitle: "Unidad 4: Ecuaciones de Bernoulli y Energía",
+                type: "conceptual",
+                question: "Define Gasto Másico ($\\dot{m}$) y Gasto Volumétrico ($\\dot{V}$). ¿Cómo se relacionan entre sí?",
+                keywords: ["masa", "volumen", "tiempo", "densidad", "relación", "m = rho V"],
+                sampleAnswer: "El gasto másico $\\dot{m}$ es la masa de fluido que cruza una sección por unidad de tiempo ($\text{kg/s}$). El gasto volumétrico $\\dot{V}$ es el volumen que cruza por unidad de tiempo ($\text{m}^3\text{/s}$). Se relacionan directamente mediante la densidad: $\\dot{m} = \\rho \\dot{V}$.",
+                hints: ["Piensa en la masa o volumen que fluye por segundo a través de una tubería."]
+            },
+            {
+                id: 24,
+                unit: 4,
+                unitTitle: "Unidad 4: Ecuaciones de Bernoulli y Energía",
+                type: "conceptual",
+                question: "Nombre cuatro magnitudes físicas que se conservan y dos magnitudes que NO se conservan durante un proceso de flujo en ingeniería.",
+                keywords: ["conservan", "masa", "energía", "momento", "carga", "no conservan", "entropía", "volumen"],
+                sampleAnswer: "Magnitudes que SE CONSERVAN: Masa, Energía total, Cantidad de movimiento (Momentum), Carga eléctrica. Magnitudes que NO SE CONSERVAN: Entropía (se genera), Volumen (en fluidos compresibles) o Exergía.",
+                hints: ["Recuerda las leyes fundamentales de conservación y las propiedades termodinámicas irreversibles."]
+            },
+            {
+                id: 25,
+                unit: 4,
+                unitTitle: "Unidad 4: Ecuaciones de Bernoulli y Energía",
+                type: "conceptual",
+                question: "Exprese la ecuación de Bernoulli en tres formas distintas: a) Términos de Presión, b) Términos de Cargas (Heads), c) Términos de Energía por unidad de masa.",
+                keywords: ["P + 1/2 rho V^2 + rho g z", "P/gamma + V^2/2g + z", "P/rho + V^2/2 + g z", "cargas"],
+                sampleAnswer: "a) Presiones: $P + \\frac{1}{2}\\rho V^2 + \\rho g z = \\text{constante}$ [Pa]; b) Cargas (Heads): $\\frac{P}{\\gamma} + \\frac{V^2}{2g} + z = \\text{constante}$ [m]; c) Energía/masa: $\\frac{P}{\\rho} + \\frac{V^2}{2} + g z = \\text{constante}$ [J/kg].",
+                hints: ["Divide la ecuación de presiones entre $\\rho$ para energía/masa o entre $\\rho g$ para cargas."]
+            },
+            {
+                id: 26,
+                unit: 4,
+                unitTitle: "Unidad 4: Ecuaciones de Bernoulli y Energía",
+                type: "conceptual",
+                question: "¿Cuáles son las 4 suposiciones o simplificaciones principales utilizadas en la deducción de la ecuación de Bernoulli?",
+                keywords: ["estacionario", "incompresible", "sin friccion", "inviscido", "linea de corriente"],
+                sampleAnswer: "1) Flujo estacionario (permanente), 2) Flujo incompresible (densidad constante), 3) Flujo no viscoso / sin fricción (invíscido), 4) Flujo a lo largo de una misma línea de corriente.",
+                hints: ["Considera las condiciones ideales relativas al tiempo, la densidad, la viscosidad y la trayectoria."]
+            },
+            {
+                id: 27,
+                unit: 4,
+                unitTitle: "Unidad 4: Ecuaciones de Bernoulli y Energía",
+                type: "numeric",
+                question: "Un secador de pelo es un ducto de diámetro constante. Si la densidad del aire en la entrada es $\\rho_1 = 1.20\\text{ kg/m}^3$ y en la salida es $\\rho_2 = 1.05\\text{ kg/m}^3$, determine el incremento porcentual de la velocidad del aire al fluir a través del secador.",
+                givenData: "Ducto de área $A$ constante. $\\rho_1 = 1.20\\text{ kg/m}^3$, $\\rho_2 = 1.05\\text{ kg/m}^3$.",
+                targetUnit: "%",
+                acceptedUnits: ["%", "porcentaje"],
+                correctValue: 14.29,
+                tolerancePercent: 2.0,
+                formula: "\\dot{m} = \\rho_1 A V_1 = \\rho_2 A V_2 \\implies \\frac{V_2}{V_1} = \\frac{\\rho_1}{\\rho_2} = \\frac{1.20}{1.05} = 1.14285 \\implies \\Delta V(\\%) = 14.29\\%",
+                hints: [
+                    "Paso 1: Aplica la conservación de la masa $\\dot{m} = \\rho_1 A V_1 = \\rho_2 A V_2$.",
+                    "Paso 2: Al cancelar el área constante $A$, la razón de velocidades es $V_2/V_1 = \\rho_1 / \\rho_2$.",
+                    "Paso 3: El incremento porcentual es $(V_2/V_1 - 1) \\times 100\\%$."
+                ]
+            },
+            {
+                id: 28,
+                unit: 4,
+                unitTitle: "Unidad 4: Ecuaciones de Bernoulli y Energía",
+                type: "numeric",
+                question: "Una computadora de escritorio es enfriada por un ventilador cuyo flujo volumétrico es $\\dot{V} = 0.30\\text{ m}^3\\text{/min}$. A una elevación donde la densidad del aire es $\\rho = 0.7\\text{ kg/m}^3$, determine el gasto másico $\\dot{m}$ en $\\text{kg/s}$.",
+                givenData: "$\\dot{V} = 0.30\\text{ m}^3\\text{/min} = 0.005\\text{ m}^3\\text{/s}$, $\\rho = 0.7\\text{ kg/m}^3$.",
+                targetUnit: "kg/s",
+                acceptedUnits: ["kg/s"],
+                correctValue: 0.0035,
+                tolerancePercent: 2.0,
+                formula: "\\dot{m} = \\rho \\dot{V} = 0.7 \\text{ kg/m}^3 \\times \\left(\\frac{0.30}{60}\\text{ m}^3\\text{/s}\\right) = 0.0035\\text{ kg/s}",
+                hints: [
+                    "Paso 1: Convierte el flujo volumétrico de $\\text{m}^3/\\text{min}$ a $\\text{m}^3/\\text{s}$ dividiendo entre 60.",
+                    "Paso 2: Multiplica la densidad por el caudal volumétrico en $\\text{m}^3/\\text{s}$."
+                ]
+            },
+            {
+                id: 29,
+                unit: 4,
+                unitTitle: "Unidad 4: Ecuaciones de Bernoulli y Energía",
+                type: "numeric",
+                question: "El aire entra de forma estacionaria a una boquilla con $\\rho_1 = 2.21\\text{ kg/m}^3$ y $V_1 = 20\\text{ m/s}$, y sale con $\\rho_2 = 0.762\\text{ kg/m}^3$ y $V_2 = 150\\text{ m/s}$. Si el área de entrada es $A_1 = 60\\text{ cm}^2$, determine el área de salida $A_2$ en $\\text{cm}^2$.",
+                givenData: "$\\rho_1 = 2.21\\text{ kg/m}^3$, $V_1 = 20\\text{ m/s}$, $A_1 = 60\\text{ cm}^2 = 0.006\\text{ m}^2$, $\\rho_2 = 0.762\\text{ kg/m}^3$, $V_2 = 150\\text{ m/s}$.",
+                targetUnit: "cm^2",
+                acceptedUnits: ["cm2", "cm^2"],
+                correctValue: 23.2,
+                tolerancePercent: 2.0,
+                formula: "\\dot{m} = \\rho_1 A_1 V_1 = 2.21 \\times 0.006 \\times 20 = 0.2652\\text{ kg/s} \\implies A_2 = \\frac{\\dot{m}}{\\rho_2 V_2} = \\frac{0.2652}{0.762 \\times 150} = 0.00232\\text{ m}^2 = 23.2\\text{ cm}^2",
+                hints: [
+                    "Paso 1: Calcula el flujo másico constante $\\dot{m} = \\rho_1 A_1 V_1$.",
+                    "Paso 2: Despeja el área de salida $A_2 = \\dot{m} / (\\rho_2 V_2)$.",
+                    "Paso 3: Convierte $A_2$ de $\\text{m}^2$ a $\\text{cm}^2$ multiplicando por 10,000."
+                ]
+            },
+
+            // UNIT 5
+            {
+                id: 30,
+                unit: 5,
+                unitTitle: "Unidad 5: Cantidad de Movimiento",
+                type: "numeric",
+                question: "Un ventilador con aspas de $61\\text{ cm}$ de diámetro impulsa $0.95\\text{ m}^3\\text{/s}$ de aire a nivel del mar ($\\rho = 1.20\\text{ kg/m}^3$). Determine la fuerza requerida para sujetar el ventilador en Newtons ($N$), asumiendo entrada a velocidad despreciable y salida cilíndrica uniforme.",
+                givenData: "$D = 0.61\\text{ m}$, $\\dot{V} = 0.95\\text{ m}^3\\text{/s}$, $\\rho = 1.20\\text{ kg/m}^3$.",
+                targetUnit: "N",
+                acceptedUnits: ["N", "newtons"],
+                correctValue: 3.72,
+                tolerancePercent: 3.0,
+                formula: "A = \\frac{\\pi}{4}(0.61)^2 = 0.2922\\text{ m}^2 \\implies V_{salida} = \\frac{0.95}{0.2922} = 3.251\\text{ m/s} \\implies \\dot{m} = 1.20 \\times 0.95 = 1.14\\text{ kg/s} \\implies F = \\dot{m} V_{salida} = 1.14 \\times 3.251 = 3.72\\text{ N}",
+                hints: [
+                    "Paso 1: Encuentra el área transversal $A = \\pi D^2 / 4$.",
+                    "Paso 2: Calcula la velocidad de salida $V_{salida} = \\dot{V} / A$.",
+                    "Paso 3: Aplica la ecuación de momento lineal $F = \\dot{m} (V_{salida} - 0)$."
+                ]
+            },
+
+            // UNIT 6
+            {
+                id: 31,
+                unit: 6,
+                unitTitle: "Unidad 6: Flujo Viscoso en Tuberías",
+                type: "conceptual",
+                question: "¿Por qué los líquidos se transportan habitualmente en tuberías de sección circular en lugar de secciones cuadradas o rectangulares?",
+                keywords: ["presión", "resistencia", "fricción", "perímetro", "área", "deformación"],
+                sampleAnswer: "Las tuberías circulares soportan mayores diferencias de presión interna sin deformarse y ofrecen el menor perímetro mojado para una área transversal dada, lo que minimiza las pérdidas por fricción del fluido.",
+                hints: ["Piensa en la resistencia estructural contra la presión y en la superficie de contacto de la pared."]
+            },
+            {
+                id: 32,
+                unit: 6,
+                unitTitle: "Unidad 6: Flujo Viscoso en Tuberías",
+                type: "mcq",
+                question: "¿Cuál es el valor del número de Reynolds ($Re$) por encima del cual el flujo en tuberías lisas se considera habitualmente turbulento?",
+                options: ["A) 2000", "B) 2300", "C) 4000", "D) 10000"],
+                correctAnswer: 2, // C
+                explanation: "Para $Re < 2300$ el flujo es laminar. Entre 2300 y 4000 es de transición, y para $Re > 4000$ el flujo es completamente turbulento.",
+                hints: ["Distingue entre el límite superior de flujo laminar ($Re \\approx 2300$) y el inicio del régimen turbulento."]
+            },
+            {
+                id: 33,
+                unit: 6,
+                unitTitle: "Unidad 6: Flujo Viscoso en Tuberías",
+                type: "mcq",
+                question: "En un flujo totalmente desarrollado dentro de una tubería circular, si se duplica la longitud de la tubería manteniéndose los demás parámetros, la pérdida de carga ($h_L$) se:",
+                options: ["A) Duplica", "B) Triplica", "C) Reduce a la mitad", "D) Cuadruplica"],
+                correctAnswer: 0, // A
+                explanation: "Según la ecuación de Darcy-Weisbach ($h_L = f \\frac{L}{D} \\frac{V^2}{2g}$), la pérdida de carga es directamente proporcional a la longitud $L$.",
+                hints: ["Revisa la proporcionalidad lineal entre $h_L$ y la longitud $L$ en la ecuación de Darcy-Weisbach."]
+            },
+            {
+                id: 34,
+                unit: 6,
+                unitTitle: "Unidad 6: Flujo Viscoso en Tuberías",
+                type: "mcq",
+                question: "En flujo laminar totalmente desarrollado en tubería circular, si el diámetro se reduce a la mitad mientras el caudal $\\dot{V}$ y la longitud se mantienen constantes, la pérdida de carga aumentará por un factor de:",
+                options: ["A) 2", "B) 4", "C) 8", "D) 16"],
+                correctAnswer: 3, // D
+                explanation: "Para flujo laminar Hagen-Poiseuille, $h_L \\propto \\frac{1}{D^4}$ cuando el caudal $\\dot{V}$ se mantiene constante. Si $D \\to D/2$, $h_L \\to 2^4 h_L = 16 h_L$.",
+                hints: ["Expresa la pérdida en función del caudal $\\dot{V}$ y del diámetro $D$, observando la potencia de $D$ en el denominador."]
+            },
+            {
+                id: 35,
+                unit: 6,
+                unitTitle: "Unidad 6: Flujo Viscoso en Tuberías",
+                type: "conceptual",
+                question: "Explique por qué el factor de fricción $f$ en el diagrama de Moody se vuelve independiente del número de Reynolds a números de Reynolds muy altos (flujo completamente turbulento).",
+                keywords: ["rugosidad", "subcapa", "viscosa", "dominante", "independiente", " Moody"],
+                sampleAnswer: "A números de Reynolds muy altos, la subcapa límite viscosa es tan delgada que las protuberancias de rugosidad de la pared sobresalen completamente de ella. La fricción pasa a ser dominada enteramente por el arrastre de forma sobre estas asperezas (rugosidad relativa $\\epsilon/D$) y no por la viscosidad.",
+                hints: ["Piensa en qué le ocurre a la subcapa viscosa cerca de la pared cuando la turbulencia es extremadamente alta."]
+            },
+            {
+                id: 36,
+                unit: 6,
+                unitTitle: "Unidad 6: Flujo Viscoso en Tuberías",
+                type: "numeric",
+                question: "En un sistema de calefacción, aire a $40^\\circ\\text{C}$ y $105\\text{ kPa}$ absolutos se distribuye por un ducto rectangular de $0.2\\text{ m} \\times 0.3\\text{ m}$ a razón de $0.5\\text{ m}^3\\text{/s}$. Determine la caída de presión $\\Delta P$ en Pascales ($\\text{Pa}$) a lo largo de $40\\text{ m}$ de ducto.",
+                givenData: "Ducto $0.2 \\times 0.3\\text{ m}$, $\\dot{V} = 0.5\\text{ m}^3\\text{/s}$, $L = 40\\text{ m}$.",
+                targetUnit: "Pa",
+                acceptedUnits: ["Pa", "pascales"],
+                correctValue: 124.0,
+                tolerancePercent: 5.0,
+                formula: "D_h = \\frac{2 a b}{a+b} = 0.24\\text{ m} \\implies \\Delta P = 124\\text{ Pa} \\text{ (según carta/fórmula de Moody)}",
+                hints: [
+                    "Paso 1: Encuentra el diámetro hidráulico $D_h = 4A/P = \\frac{2(0.2)(0.3)}{0.2+0.3} = 0.24\\text{ m}$.",
+                    "Paso 2: Calcula la velocidad media y el número de Reynolds para evaluar el factor de fricción $f$."
+                ]
+            },
+            {
+                id: 37,
+                unit: 6,
+                unitTitle: "Unidad 6: Flujo Viscoso en Tuberías",
+                type: "numeric",
+                question: "Agua a $10^\\circ\\text{C}$ ($\\rho = 999.7\\text{ kg/m}^3$, $\\mu = 1.307 \\times 10^{-3}\\text{ kg/m}\\cdot\\text{s}$) fluye en una tubería de $0.12\\text{ cm}$ de diámetro y $15\\text{ m}$ de largo a $V = 0.9\\text{ m/s}$. Determine la potencia de bombeo requerida en Watts ($W$) para superar la caída de presión.",
+                givenData: "$D = 0.0012\\text{ m}$, $L = 15\\text{ m}$, $V = 0.9\\text{ m/s}$, $\\Delta P = 392\\text{ kPa}$.",
+                targetUnit: "W",
+                acceptedUnits: ["W", "watts", "vatios"],
+                correctValue: 0.399,
+                tolerancePercent: 3.0,
+                formula: "\\dot{V} = V \\cdot \\frac{\\pi D^2}{4} = 0.9 \\times \\frac{\\pi (0.0012)^2}{4} = 1.018 \\times 10^{-6}\\text{ m}^3\\text{/s} \\implies \\dot{W}_{bomba} = \\dot{V} \\Delta P = 1.018 \\times 10^{-6} \\times 392,000 = 0.399\\text{ W}",
+                hints: [
+                    "Paso 1: Verifica que el flujo sea laminar ($Re = \\frac{\\rho V D}{\\mu} \\approx 826 < 2300$).",
+                    "Paso 2: Calcula el caudal volumétrico $\\dot{V} = A \\cdot V$.",
+                    "Paso 3: Aplica la potencia de bombeo $\\dot{W}_{bomba} = \\dot{V} \\cdot \\Delta P$."
+                ]
+            }
+        ];
+
+        /* State Management */
+        let state = {
+            currentQuestionIndex: 0,
+            filteredQuestions: [...questionsData],
+            userAnswers: {}, // id -> { answered: bool, correct: bool, attempts: int, userInput: string, unitInput: string }
+            errorIds: new Set(),
+            examActive: false,
+            examQuestions: [],
+            examUserAnswers: {},
+            examTimerInterval: null,
+            examTimeRemaining: 2700 // 45 mins in seconds
+        };
+
+        // Initialize App
+        window.onload = function() {
+            loadLocalProgress();
+            filterQuestions();
+            updateStatsUI();
+            
+            // Trigger MathJax typeset if ready
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        };
+
+        // Navigation Tab Switching
+        function switchTab(tabName) {
+            ['study', 'exam', 'review', 'stats'].forEach(t => {
+                const sec = document.getElementById(`tab-${t}`);
+                const btn = document.getElementById(`nav-${t}`);
+                if (sec && btn) {
+                    if (t === tabName) {
+                        sec.classList.remove('hidden');
+                        btn.classList.add('bg-indigo-600', 'text-white', 'shadow');
+                        btn.classList.remove('text-indigo-300');
+                    } else {
+                        sec.classList.add('hidden');
+                        btn.classList.remove('bg-indigo-600', 'text-white', 'shadow');
+                        btn.classList.add('text-indigo-300');
+                    }
+                }
+            });
+
+            if (tabName === 'review') renderErrorList();
+            if (tabName === 'stats') updateStatsUI();
+        }
+
+        // Filter Questions by Unit Selection
+        function filterQuestions() {
+            const selectVal = document.getElementById('unit-select').value;
+            if (selectVal === 'all') {
+                state.filteredQuestions = [...questionsData];
+            } else {
+                const uNum = parseInt(selectVal);
+                state.filteredQuestions = questionsData.filter(q => q.unit === uNum);
+            }
+            state.currentQuestionIndex = 0;
+            renderCurrentQuestion();
+        }
+
+        // Render Current Question in Study Mode
+        function renderCurrentQuestion() {
+            const container = document.getElementById('question-card');
+            const questions = state.filteredQuestions;
+            const total = questions.length;
+
+            if (total === 0) {
+                container.innerHTML = `<div class="p-8 text-center text-slate-500">No hay preguntas disponibles en este tema.</div>`;
+                return;
+            }
+
+            const q = questions[state.currentQuestionIndex];
+            const qState = state.userAnswers[q.id] || { answered: false, correct: false, attempts: 0, userInput: '', unitInput: '' };
+
+            // Update Header progress counter
+            document.getElementById('question-counter').innerText = `Ejercicio ${state.currentQuestionIndex + 1} de ${total}`;
+            const pct = ((state.currentQuestionIndex + 1) / total) * 100;
+            document.getElementById('unit-progress-bar').style.width = `${pct}%`;
+
+            // Navigation Buttons State
+            document.getElementById('btn-prev').disabled = state.currentQuestionIndex === 0;
+            document.getElementById('btn-next').disabled = state.currentQuestionIndex === total - 1;
+
+            let badgeColor = "bg-indigo-100 text-indigo-800";
+            let typeLabel = "Respuesta Abierta / Concepto";
+            if (q.type === 'mcq') { badgeColor = "bg-purple-100 text-purple-800"; typeLabel = "Opción Múltiple"; }
+            if (q.type === 'numeric') { badgeColor = "bg-amber-100 text-amber-800"; typeLabel = "Resolución Numérica"; }
+
+            let html = `
+                <div class="p-6 border-b border-slate-100 flex justify-between items-start flex-wrap gap-2">
+                    <div>
+                        <span class="inline-block px-2.5 py-1 rounded-md text-xs font-semibold ${badgeColor} mb-2">
+                            ${typeLabel}
+                        </span>
+                        <h3 class="text-sm font-semibold text-indigo-900">${q.unitTitle}</h3>
+                    </div>
+                    <div class="text-xs text-slate-400 font-mono">ID Ejercicio: #${q.id}</div>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <!-- Question Text -->
+                    <div class="text-slate-800 text-base font-medium leading-relaxed">
+                        ${q.question}
+                    </div>
+            `;
+
+            // If given data exists
+            if (q.givenData) {
+                html += `
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs font-mono text-slate-700">
+                        <i class="fa-solid fa-database text-indigo-500 mr-2"></i><strong>Datos proporcionados:</strong> ${q.givenData}
+                    </div>
+                `;
+            }
+
+            // Interactive Input Area based on type
+            html += `<div class="space-y-4">`;
+
+            if (q.type === 'mcq') {
+                html += `<div class="space-y-2">`;
+                q.options.forEach((opt, idx) => {
+                    const isSelected = qState.userInput === idx.toString();
+                    html += `
+                        <label class="flex items-center p-3 rounded-xl border ${isSelected ? 'border-indigo-600 bg-indigo-50/50' : 'border-slate-200 hover:bg-slate-50'} cursor-pointer transition-all">
+                            <input type="radio" name="mcq-opt" value="${idx}" ${isSelected ? 'checked' : ''} ${qState.answered ? 'disabled' : ''} onchange="saveMCQInput(this.value)" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                            <span class="ml-3 text-sm text-slate-700 font-medium">${opt}</span>
+                        </label>
+                    `;
+                });
+                html += `</div>`;
+            } else if (q.type === 'numeric') {
+                html += `
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Valor Numérico Calculado:</label>
+                            <input type="number" step="any" id="input-numeric-val" value="${qState.userInput || ''}" ${qState.answered ? 'disabled' : ''} placeholder="Ej: 2166.67" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Unidades (${q.targetUnit}):</label>
+                            <input type="text" id="input-numeric-unit" value="${qState.unitInput || ''}" ${qState.answered ? 'disabled' : ''} placeholder="Ej: ${q.targetUnit}" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none">
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Conceptual Open Response
+                html += `
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Escribe tu explicación conceptual:</label>
+                        <textarea id="input-conceptual" rows="3" ${qState.answered ? 'disabled' : ''} placeholder="Escribe tu respuesta argumentada aquí..." class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none custom-scrollbar">${qState.userInput || ''}</textarea>
+                    </div>
+                `;
+            }
+
+            html += `</div>`; // Close Input Area
+
+            // Hints Accordion Button
+            if (q.hints && q.hints.length > 0) {
+                html += `
+                    <div class="pt-2">
+                        <button onclick="toggleHints()" class="text-xs font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-3 py-1.5 rounded-lg transition-colors flex items-center">
+                            <i class="fa-regular fa-lightbulb text-amber-500 mr-2"></i> Pistas Sugeridas
+                        </button>
+                        <div id="hints-box" class="hidden mt-3 p-4 bg-amber-50/60 border border-amber-200 rounded-xl space-y-2 text-xs text-amber-900">
+                            ${q.hints.map(h => `<p class="flex items-start"><i class="fa-solid fa-chevron-right text-amber-500 mr-2 mt-0.5"></i> <span>${h}</span></p>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Action Check Button
+            if (!qState.answered) {
+                html += `
+                    <div class="pt-4 border-t border-slate-100 flex justify-end">
+                        <button onclick="checkAnswer(${q.id})" class="px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold shadow hover:bg-indigo-700 transition-all text-sm">
+                            <i class="fa-solid fa-check mr-2"></i> Comprobar Respuesta
+                        </button>
+                    </div>
+                `;
+            } else {
+                // Feedback Panel
+                const isCorr = qState.correct;
+                html += `
+                    <div class="mt-6 p-5 rounded-xl border ${isCorr ? 'bg-emerald-50/80 border-emerald-200' : 'bg-rose-50/80 border-rose-200'} space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid ${isCorr ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-600'} text-xl"></i>
+                            <h4 class="font-bold text-sm ${isCorr ? 'text-emerald-900' : 'text-rose-900'}">
+                                ${isCorr ? '¡Excelente! Respuesta Correcta' : 'Respuesta Incorrecta o Incompleta'}
+                            </h4>
+                        </div>
+
+                        <!-- Solution & Explanation Breakdown -->
+                        <div class="text-xs ${isCorr ? 'text-emerald-800' : 'text-rose-800'} space-y-2">
+                            ${q.type === 'conceptual' ? `
+                                <p><strong>Respuesta de Referencia Académica:</strong> ${q.sampleAnswer}</p>
+                            ` : ''}
+
+                            ${q.type === 'mcq' ? `
+                                <p><strong>Explicación:</strong> ${q.explanation}</p>
+                            ` : ''}
+
+                            ${q.type === 'numeric' ? `
+                                <p><strong>Solución Detallada:</strong></p>
+                                <div class="font-mono bg-white/80 p-3 rounded-lg border border-slate-200 text-slate-800">
+                                    ${q.formula}
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        ${!isCorr ? `
+                            <button onclick="resetQuestionState(${q.id})" class="mt-2 text-xs font-semibold px-3 py-1.5 bg-rose-600 text-white rounded-lg hover:bg-rose-700">
+                                Intenta de nuevo
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            html += `</div>`; // Close main padding
+            container.innerHTML = html;
+
+            // Trigger MathJax re-render
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function saveMCQInput(val) {
+            const q = state.filteredQuestions[state.currentQuestionIndex];
+            if (!state.userAnswers[q.id]) state.userAnswers[q.id] = {};
+            state.userAnswers[q.id].userInput = val;
+        }
+
+        function toggleHints() {
+            const box = document.getElementById('hints-box');
+            if (box) box.classList.toggle('hidden');
+        }
+
+        function navigateQuestion(dir) {
+            const newIndex = state.currentQuestionIndex + dir;
+            if (newIndex >= 0 && newIndex < state.filteredQuestions.length) {
+                state.currentQuestionIndex = newIndex;
+                renderCurrentQuestion();
+            }
+        }
+
+        // Answer Validation Engine
+        function checkAnswer(qId) {
+            const q = questionsData.find(item => item.id === qId);
+            if (!q) return;
+
+            let isCorrect = false;
+            let userVal = '';
+            let unitVal = '';
+
+            if (q.type === 'mcq') {
+                const checked = document.querySelector('input[name="mcq-opt"]:checked');
+                if (!checked) return;
+                userVal = checked.value;
+                isCorrect = parseInt(userVal) === q.correctAnswer;
+            } else if (q.type === 'numeric') {
+                const valInput = document.getElementById('input-numeric-val');
+                const unitInput = document.getElementById('input-numeric-unit');
+                if (!valInput || !unitInput) return;
+
+                userVal = valInput.value.trim();
+                unitVal = unitInput.value.trim().toLowerCase();
+
+                const parsedNum = parseFloat(userVal);
+                if (isNaN(parsedNum)) return;
+
+                // Validate Number with Tolerance
+                const targetVal = q.correctValue;
+                const tol = (q.tolerancePercent / 100) * Math.abs(targetVal);
+                const numCorrect = Math.abs(parsedNum - targetVal) <= tol;
+
+                // Validate Unit
+                const unitCorrect = q.acceptedUnits.some(u => u.toLowerCase() === unitVal);
+
+                isCorrect = numCorrect && unitCorrect;
+            } else {
+                // Conceptual Question
+                const txtArea = document.getElementById('input-conceptual');
+                if (!txtArea) return;
+                userVal = txtArea.value.trim();
+
+                if (userVal.length < 5) return; // minimal attempt check
+
+                // Check keyword match heuristic
+                const matchedKw = q.keywords.filter(kw => userVal.toLowerCase().includes(kw.toLowerCase()));
+                isCorrect = matchedKw.length >= Math.min(2, q.keywords.length);
+            }
+
+            // Record State
+            if (!state.userAnswers[q.id]) {
+                state.userAnswers[q.id] = { attempts: 0 };
+            }
+            state.userAnswers[q.id].answered = true;
+            state.userAnswers[q.id].correct = isCorrect;
+            state.userAnswers[q.id].attempts += 1;
+            state.userAnswers[q.id].userInput = userVal;
+            state.userAnswers[q.id].unitInput = unitVal;
+
+            if (!isCorrect) {
+                state.errorIds.add(q.id);
+            } else {
+                state.errorIds.delete(q.id);
+            }
+
+            saveLocalProgress();
+            renderCurrentQuestion();
+            updateStatsUI();
+        }
+
+        function resetQuestionState(qId) {
+            if (state.userAnswers[qId]) {
+                state.userAnswers[qId].answered = false;
+            }
+            renderCurrentQuestion();
+        }
+
+        function resetCurrentQuestion() {
+            const q = state.filteredQuestions[state.currentQuestionIndex];
+            if (q) resetQuestionState(q.id);
+        }
+
+        function startExam() {
+            // Pick 10 random questions
+            const shuffled = [...questionsData].sort(() => 0.5 - Math.random());
+            state.examQuestions = shuffled.slice(0, 10);
+            state.examUserAnswers = {};
+            state.examActive = true;
+            state.examTimeRemaining = 2700; // 45 minutes
+
+            document.getElementById('exam-welcome').classList.add('hidden');
+            document.getElementById('exam-results').classList.add('hidden');
+            document.getElementById('exam-active').classList.remove('hidden');
+
+            state.currentExamIndex = 0;
+            renderExamQuestion();
+            startExamTimer();
+        }
+
+        function startExamTimer() {
+            if (state.examTimerInterval) clearInterval(state.examTimerInterval);
+            state.examTimerInterval = setInterval(() => {
+                state.examTimeRemaining--;
+                const mins = Math.floor(state.examTimeRemaining / 60);
+                const secs = state.examTimeRemaining % 60;
+                document.getElementById('exam-timer').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+                if (state.examTimeRemaining <= 0) {
+                    clearInterval(state.examTimerInterval);
+                    finishExam();
+                }
+            }, 1000);
+        }
+
+        function renderExamQuestion() {
+            const container = document.getElementById('exam-question-card');
+            const q = state.examQuestions[state.currentExamIndex];
+            const total = state.examQuestions.length;
+
+            document.getElementById('exam-progress-text').innerText = `Pregunta ${state.currentExamIndex + 1} de ${total}`;
+            document.getElementById('btn-exam-prev').disabled = state.currentExamIndex === 0;
+            document.getElementById('btn-exam-next').disabled = state.currentExamIndex === total - 1;
+
+            const existingAns = state.examUserAnswers[q.id] || { val: '', unit: '' };
+
+            let html = `
+                <div class="space-y-4">
+                    <div class="text-xs font-semibold text-indigo-600">${q.unitTitle}</div>
+                    <div class="text-base font-medium text-slate-800">${q.question}</div>
+            `;
+
+            if (q.givenData) {
+                html += `<div class="bg-slate-50 p-3 rounded-lg text-xs font-mono text-slate-700">${q.givenData}</div>`;
+            }
+
+            if (q.type === 'mcq') {
+                html += `<div class="space-y-2 mt-4">`;
+                q.options.forEach((opt, idx) => {
+                    const isChecked = existingAns.val === idx.toString();
+                    html += `
+                        <label class="flex items-center p-3 rounded-xl border ${isChecked ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200'} cursor-pointer">
+                            <input type="radio" name="exam-opt" value="${idx}" ${isChecked ? 'checked' : ''} onchange="saveExamInput('${q.id}', this.value, '')" class="w-4 h-4 text-indigo-600">
+                            <span class="ml-3 text-sm text-slate-700">${opt}</span>
+                        </label>
+                    `;
+                });
+                html += `</div>`;
+            } else if (q.type === 'numeric') {
+                html += `
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Valor Calculado:</label>
+                            <input type="number" step="any" value="${existingAns.val}" oninput="saveExamInput('${q.id}', this.value, document.getElementById('exam-unit').value)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Unidades:</label>
+                            <input type="text" id="exam-unit" value="${existingAns.unit}" oninput="saveExamInput('${q.id}', document.querySelector('input[type=number]').value, this.value)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                        </div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="mt-4">
+                        <textarea rows="3" oninput="saveExamInput('${q.id}', this.value, '')" placeholder="Escribe tu respuesta..." class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm">${existingAns.val}</textarea>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+            container.innerHTML = html;
+
+            if (window.MathJax) MathJax.typesetPromise();
+        }
+
+        function saveExamInput(qId, val, unit) {
+            state.examUserAnswers[qId] = { val: val.trim(), unit: unit.trim().toLowerCase() };
+        }
+
+        function navigateExamQuestion(dir) {
+            const newIdx = state.currentExamIndex + dir;
+            if (newIdx >= 0 && newIdx < state.examQuestions.length) {
+                state.currentExamIndex = newIdx;
+                renderExamQuestion();
+            }
+        }
+
+        function finishExam() {
+            if (state.examTimerInterval) clearInterval(state.examTimerInterval);
+            state.examActive = false;
+
+            document.getElementById('exam-active').classList.add('hidden');
+            const resultsContainer = document.getElementById('exam-results');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            let total = state.examQuestions.length;
+
+            let reviewHtml = `<div class="space-y-4">`;
+
+            state.examQuestions.forEach((q, idx) => {
+                const ans = state.examUserAnswers[q.id] || { val: '', unit: '' };
+                let isCorrect = false;
+
+                if (q.type === 'mcq') {
+                    isCorrect = parseInt(ans.val) === q.correctAnswer;
+                } else if (q.type === 'numeric') {
+                    const num = parseFloat(ans.val);
+                    const tol = (q.tolerancePercent / 100) * Math.abs(q.correctValue);
+                    const numOk = !isNaN(num) && Math.abs(num - q.correctValue) <= tol;
+                    const unitOk = q.acceptedUnits.some(u => u.toLowerCase() === ans.unit);
+                    isCorrect = numOk && unitOk;
+                } else {
+                    const matchedKw = q.keywords.filter(kw => ans.val.toLowerCase().includes(kw.toLowerCase()));
+                    isCorrect = matchedKw.length >= Math.min(2, q.keywords.length);
+                }
+
+                if (isCorrect) score++;
+
+                reviewHtml += `
+                    <div class="p-4 rounded-xl border ${isCorrect ? 'border-emerald-200 bg-emerald-50/50' : 'border-rose-200 bg-rose-50/50'} text-xs space-y-1">
+                        <div class="font-bold text-slate-800">${idx + 1}. ${q.question}</div>
+                        <div class="${isCorrect ? 'text-emerald-700' : 'text-rose-700'}">
+                            <strong>Tu respuesta:</strong> ${ans.val || 'Sin responder'} ${ans.unit ? '(' + ans.unit + ')' : ''} — 
+                            <strong>${isCorrect ? 'Correcta' : 'Incorrecta'}</strong>
+                        </div>
+                        ${!isCorrect ? `<div class="text-slate-600 mt-1"><strong>Solución:</strong> ${q.sampleAnswer || q.formula || q.explanation}</div>` : ''}
+                    </div>
+                `;
+            });
+
+            reviewHtml += `</div>`;
+
+            const percentage = Math.round((score / total) * 100);
+
+            resultsContainer.innerHTML = `
+                <div class="text-center space-y-3">
+                    <h3 class="text-2xl font-bold text-slate-800">Resultado del Simulacro</h3>
+                    <div class="text-5xl font-extrabold ${percentage >= 70 ? 'text-emerald-600' : 'text-rose-600'}">${percentage}%</div>
+                    <p class="text-sm text-slate-600">Obtuviste <strong>${score} de ${total}</strong> aciertos.</p>
+                </div>
+                <div class="pt-4 border-t border-slate-200">
+                    <h4 class="font-bold text-slate-800 text-sm mb-3">Revisión Detallada:</h4>
+                    ${reviewHtml}
+                </div>
+                <button onclick="startExam()" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700">
+                    Volver a Intentar Simulacro
+                </button>
+            `;
+
+            if (window.MathJax) MathJax.typesetPromise();
+        }
+
+        // Render Error List Tab
+        function renderErrorList() {
+            const container = document.getElementById('error-list-container');
+            const errArray = Array.from(state.errorIds);
+
+            if (errArray.length === 0) {
+                container.innerHTML = `
+                    <div class="p-8 text-center text-slate-500">
+                        <i class="fa-solid fa-circle-check text-emerald-500 text-3xl mb-2"></i>
+                        <p class="font-medium">¡No tienes preguntas pendientes por repasar!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            errArray.forEach(id => {
+                const q = questionsData.find(item => item.id === id);
+                if (!q) return;
+
+                html += `
+                    <div class="p-4 rounded-xl border border-rose-200 bg-rose-50/30 flex justify-between items-center flex-wrap gap-3">
+                        <div class="space-y-1 max-w-2xl">
+                            <span class="text-xs font-semibold text-rose-800">${q.unitTitle}</span>
+                            <p class="text-sm text-slate-800 font-medium">${q.question}</p>
+                        </div>
+                        <button onclick="jumpToQuestion(${q.id})" class="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700 shadow-sm">
+                            Resolver Ahora
+                        </button>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function jumpToQuestion(qId) {
+            document.getElementById('unit-select').value = 'all';
+            filterQuestions();
+            const idx = state.filteredQuestions.findIndex(q => q.id === qId);
+            if (idx !== -1) {
+                state.currentQuestionIndex = idx;
+                switchTab('study');
+                renderCurrentQuestion();
+            }
+        }
+
+        function clearErrorList() {
+            state.errorIds.clear();
+            renderErrorList();
+            updateStatsUI();
+            saveLocalProgress();
+        }
+
+        // Statistics Dashboard update
+        function updateStatsUI() {
+            const totalQ = questionsData.length;
+            const answeredKeys = Object.keys(state.userAnswers);
+            const totalAnswered = answeredKeys.length;
+
+            let correctCount = 0;
+            answeredKeys.forEach(k => {
+                if (state.userAnswers[k].correct) correctCount++;
+            });
+
+            const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
+
+            document.getElementById('stat-total-answered').innerText = `${totalAnswered} / ${totalQ}`;
+            document.getElementById('stat-mastered').innerText = correctCount;
+            document.getElementById('stat-accuracy').innerText = `${accuracy}%`;
+            document.getElementById('stat-errors-count').innerText = state.errorIds.size;
+
+            // Update badge on navbar
+            const errorBadge = document.getElementById('error-badge');
+            if (state.errorIds.size > 0) {
+                errorBadge.innerText = state.errorIds.size;
+                errorBadge.classList.remove('hidden');
+            } else {
+                errorBadge.classList.add('hidden');
+            }
+
+            // Breakdown by unit
+            const breakdownContainer = document.getElementById('unit-stats-breakdown');
+            let breakdownHtml = '';
+
+            for (let u = 1; u <= 6; u++) {
+                const unitQs = questionsData.filter(q => q.unit === u);
+                const unitTotal = unitQs.length;
+                const unitCorrect = unitQs.filter(q => state.userAnswers[q.id] && state.userAnswers[q.id].correct).length;
+                const pct = Math.round((unitCorrect / unitTotal) * 100);
+
+                breakdownHtml += `
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                            <span>Unidad ${u}: ${unitQs[0]?.unitTitle.split(':')[1]}</span>
+                            <span>${unitCorrect} / ${unitTotal} Dominadas (${pct}%)</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                            <div class="bg-indigo-600 h-full rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            breakdownContainer.innerHTML = breakdownHtml;
+        }
+
+        // Local Storage Utilities
+        function saveLocalProgress() {
+            const payload = {
+                userAnswers: state.userAnswers,
+                errorIds: Array.from(state.errorIds)
+            };
+            localStorage.setItem('fluid_mechanics_guide_progress', JSON.stringify(payload));
+        }
+
+        function loadLocalProgress() {
+            const saved = localStorage.getItem('fluid_mechanics_guide_progress');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    state.userAnswers = parsed.userAnswers || {};
+                    state.errorIds = new Set(parsed.errorIds || []);
+                } catch(e) {
+                    console.error("Error loading saved state", e);
+                }
+            }
+        }
+
+        function resetAllData() {
+            if (confirm("¿Estás seguro de que deseas restablecer todo tu progreso de estudio?")) {
+                localStorage.removeItem('fluid_mechanics_guide_progress');
+                state.userAnswers = {};
+                state.errorIds.clear();
+                renderCurrentQuestion();
+                updateStatsUI();
+            }
+        }
+    </script>
+</body>
+</html>
